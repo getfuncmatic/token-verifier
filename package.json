@@ -1,0 +1,28 @@
+{
+  "name": "token-verifier",
+  "version": "1.0.0-alpha",
+  "description": "Library to validate JWT tokens from identity vendors such as Auth0, AWS Cognito, and Okta.",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "Daniel Jhin Yoo <danieljyoo@gmail.com> (https://github.com/danieljyoo)",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/danieljyoo/token-verifier.git"
+  },
+  "dependencies": {
+    "auth0": "^2.9.1",
+    "axios": "^0.18.0",
+    "jwt-decode": "^2.2.0",
+    "node-jose": "^1.0.0",
+    "pino": "^4.11.0"
+  },
+  "devDependencies": {
+    "jest": "^21.2.1"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  }
+}
