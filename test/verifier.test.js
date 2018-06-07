@@ -36,24 +36,49 @@ describe('Initialize Plugins', async () => {
         clientId: 'auth0clientid'
       }
     }
-    var plugins = verifier.initializePlugins(options)
-    expect(plugins.length).toBe(1)
-    expect(plugins[0].name).toBe("auth0")
+    var auth0 = verifier.create(options)
+    expect(auth0.plugins.length).toBe(1)
+    expect(auth0.plugins[0].name).toBe("auth0")
     options.cognito = {
       region: 'region',
       userPoolId: 'userpoolid',
       clientId: 'clientid'
     }
-    plugins = verifier.initializePlugins(options)
-    expect(plugins.length).toBe(2)
-    expect(plugins[0].name).toBe("auth0")
-    expect(plugins[1].name).toBe("cognito")
+    var cognito = verifier.create(options)
+    expect(cognito.plugins.length).toBe(2)
+    expect(cognito.plugins[0].name).toBe("auth0")
+    expect(cognito.plugins[1].name).toBe("cognito")
+  })
+  it ('should initialize two different instances of the verifier', async () => {
+      
+      var auth0 = verifier.create({
+        auth0: { 
+          domain: 'auth0domain',
+          clientId: 'auth0clientid'
+        }
+      })
+      var cognito = verifier.create({
+        cognito: {
+          region: 'region',
+          userPoolId: 'userpoolid',
+          clientId: 'clientid'
+        }
+      })
+      expect(auth0.plugins.length).toBe(1)
+      expect(auth0.plugins[0]).toMatchObject({
+        name: "auth0"
+      })
+      expect(cognito.plugins.length).toBe(1)
+      expect(cognito.plugins[0]).toMatchObject({
+        name: "cognito"
+      })
   })
 })
 
 describe('Verify token', async () => {
+  var v = null
   beforeEach(() => {
-    verifier.initializePlugins({
+    v = verifier.create({
       auth0: { 
         domain: process.env.AUTH0_DOMAIN,
         clientId: process.env.AUTH0_CLIENTID
@@ -66,7 +91,7 @@ describe('Verify token', async () => {
     })
   })
   it ('should return false before providers if given token is already expired', async () => {
-    var result = await verifier.verify(EXPIRED_AUTH0_TOKEN)
+    var result = await v.verify(EXPIRED_AUTH0_TOKEN)
       expect(result.verification).toMatchObject({
         provider: null,
         verified: false,
@@ -74,17 +99,17 @@ describe('Verify token', async () => {
     })
   })
   it ('should route the token to the correct plugin', async () => {
-    var result = await verifier.verify(EXPIRED_AUTH0_TOKEN, { skipExpirationCheck: true })
+    var result = await v.verify(EXPIRED_AUTH0_TOKEN, { skipExpirationCheck: true })
     expect(result.verification).toMatchObject({
       provider: "auth0"
     })
-    var result = await verifier.verify(EXPIRED_COGNITO_TOKEN, { skipExpirationCheck: true })
+    var result = await v.verify(EXPIRED_COGNITO_TOKEN, { skipExpirationCheck: true })
     expect(result.verification).toMatchObject({
       provider: "cognito"
     })
   })
   it ('should return no matching provider if no plugin matches', async () => {
-    var result = await verifier.verify("DUMMY-TOKEN", {
+    var result = await v.verify("DUMMY-TOKEN", {
       skipExpirationCheck: true,
       decoded: {
         payload: { iss: "https://no-matching-provider.com" }
