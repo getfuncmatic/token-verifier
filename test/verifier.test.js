@@ -31,19 +31,21 @@ describe('isTokenExpired', () => {
 describe('Initialize Plugins', async () => {
   it ('should initialize the correct plugins based on options', async () => {
     var options = {
-      auth0: { 
+      plugins: [ { 
+        provider: 'auth0',
         domain: 'auth0domain',
         clientId: 'auth0clientid'
-      }
+      } ]
     }
     var auth0 = verifier.create(options)
     expect(auth0.plugins.length).toBe(1)
     expect(auth0.plugins[0].name).toBe("auth0")
-    options.cognito = {
+    options.plugins.push({
+      provider: 'cognito',
       region: 'region',
       userPoolId: 'userpoolid',
       clientId: 'clientid'
-    }
+    })
     var cognito = verifier.create(options)
     expect(cognito.plugins.length).toBe(2)
     expect(cognito.plugins[0].name).toBe("auth0")
@@ -52,17 +54,19 @@ describe('Initialize Plugins', async () => {
   it ('should initialize two different instances of the verifier', async () => {
       
       var auth0 = verifier.create({
-        auth0: { 
+        plugins: [ { 
+          provider: 'auth0',
           domain: 'auth0domain',
           clientId: 'auth0clientid'
-        }
+        } ]
       })
       var cognito = verifier.create({
-        cognito: {
+        plugins: [ {
+          provider: 'cognito',
           region: 'region',
           userPoolId: 'userpoolid',
           clientId: 'clientid'
-        }
+        } ]
       })
       expect(auth0.plugins.length).toBe(1)
       expect(auth0.plugins[0]).toMatchObject({
@@ -79,15 +83,16 @@ describe('Verify token', async () => {
   var v = null
   beforeEach(() => {
     v = verifier.create({
-      auth0: { 
+      plugins: [ { 
+        provider: 'auth0',
         domain: process.env.AUTH0_DOMAIN,
         clientId: process.env.AUTH0_CLIENTID
-      },
-      cognito: {
+      }, {
+        provider: 'cognito',
         region: process.env.COGNITO_REGION,
         userPoolId: process.env.COGNITO_USERPOOLID,
         clientId: process.env.AUTH0_CLIENTID
-      }
+      } ]
     })
   })
   it ('should return false before providers if given token is already expired', async () => {
