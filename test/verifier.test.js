@@ -7,12 +7,12 @@ const EXPIRED_COGNITO_TOKEN = "eyJraWQiOiJVMmozN3pRMDlBMFdOWVM0Z2t1YWhwVzJRXC94a
 describe('isTokenExpired', () => {
   it ('should return false if token is not expired', async () => {
     var exp = getCurrentTimeInSeconds(10)  
-    var res = verifier.isTokenExpired({ exp })
+    var res = verifier.isTokenExpired({ payload: { exp } })
     expect(res).toBe(false)
   })
   it ('should return current true value with time and exp if token is expired', async () => {
     var exp = getCurrentTimeInSeconds(-10)
-    var res = verifier.isTokenExpired({ exp })
+    var res = verifier.isTokenExpired({ payload: { exp } })
     expect(res).toBeTruthy()
     expect(res).toMatchObject({
       t: expect.anything(),
@@ -20,7 +20,7 @@ describe('isTokenExpired', () => {
     })
   })
   it ('should return current true value with time if token does not have exp', async () => {
-    var res = verifier.isTokenExpired({ })
+    var res = verifier.isTokenExpired({ payload: { } })
     expect(res).toBeTruthy()
     expect(res).toMatchObject({
       t: expect.anything()
